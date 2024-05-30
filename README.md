@@ -1,0 +1,4 @@
+- Final Project Title & Description (1 paragraph)
+- Features
+- members + NRP
+- screenshot UI app in the readme (and references)
