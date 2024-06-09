@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "908925798322",
+    "project_id": "mobileprogramming-da8cf",
+    "storage_bucket": "mobileprogramming-da8cf.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:908925798322:android:7f61f35d5d1b20ff0246ab",
+        "android_client_info": {
+          "package_name": "com.example.final_project_booking"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBz-e7XwpaKs88d-WCDdIJ-SPLchXtF_8U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:908925798322:android:fa8a12e16d0a90a50246ab",
+        "android_client_info": {
+          "package_name": "com.example.firebase"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBz-e7XwpaKs88d-WCDdIJ-SPLchXtF_8U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

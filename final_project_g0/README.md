@@ -1,6 +1,6 @@
-# final_project_g0
+# firebase
 
-Final Project Group 0
+A new Flutter project.
 
 ## Getting Started
 
