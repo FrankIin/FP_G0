@@ -1,10 +1,5 @@
-// import 'dart:js_interop';
-
-// import 'dart:js';
-
 import '/components/my_button.dart';
 import '/components/my_textfield.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -16,26 +11,23 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-
   // text editing controllers
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
-
-  void register(){
+  void register() {
     Navigator.popAndPushNamed(context, "/register");
-
   }
+
   // sign user in method
   void signUserIn() async {
-
     showDialog(
-        context: context,
-        builder: (context) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        }
+      context: context,
+      builder: (context) {
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      },
     );
 
     try {
@@ -44,52 +36,24 @@ class _LoginPageState extends State<LoginPage> {
         password: passwordController.text,
       );
 
-      Navigator.pop(context);
+      if (mounted) {
+        Navigator.pop(context);
+      }
     } on FirebaseAuthException catch (e) {
-      Navigator.pop(context);
-      showDialog(
-        context: context,
-        // barrierDismissible: false,
-        builder: (BuildContext context) {
-          return const AlertDialog(
-            content: Text('Incorrect Email or Password'),
-            title: Text('Please recheck again!'),
-          );
-        },
-      );
-      // if (e.code == 'user-not-found') {
-      //   wrongEmailMessage();
-      // }
-      // else if (e.code == 'wrong-password') {
-      //   wrongPasswordMessage();
-      // }
-
+      if (mounted) {
+        Navigator.pop(context);
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return const AlertDialog(
+              content: Text('Incorrect Email or Password'),
+              title: Text('Please recheck again!'),
+            );
+          },
+        );
+      }
     }
   }
-
-  // void wrongEmailMessage() {
-  //   showDialog(
-  //       context: context,
-  //       barrierDismissible: false,
-  //       builder: (BuildContext context) {
-  //         return const AlertDialog(
-  //           content: Text('Incorrect Email'),
-  //         );
-  //       },
-  //   );
-  // }
-  //
-  // void wrongPasswordMessage() {
-  //   showDialog(
-  //     context: context,
-  //     barrierDismissible: false,
-  //     builder: (BuildContext context) {
-  //       return const AlertDialog(
-  //         content: Text('Incorrect Password'),
-  //       );
-  //     },
-  //   );
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -101,15 +65,12 @@ class _LoginPageState extends State<LoginPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const SizedBox(height: 50),
-              //
-              // // logo
+              // logo
               const Icon(
                 Icons.lock,
                 size: 100,
               ),
-              //
               const SizedBox(height: 50),
-              //
               Text(
                 "Welcome Back!",
                 style: TextStyle(
@@ -117,27 +78,19 @@ class _LoginPageState extends State<LoginPage> {
                   fontSize: 16,
                 ),
               ),
-              //
               const SizedBox(height: 25),
-
               MyTextField(
                 controller: emailController,
                 hintText: 'Email',
                 obsureText: false,
               ),
-              //
               const SizedBox(height: 25),
-
-              // password textfield
               MyTextField(
                 controller: passwordController,
                 hintText: 'Password',
                 obsureText: true,
               ),
-              //
               const SizedBox(height: 25),
-
-              // forget password
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 25.0),
                 child: Row(
@@ -150,17 +103,11 @@ class _LoginPageState extends State<LoginPage> {
                   ],
                 ),
               ),
-              //
               const SizedBox(height: 25),
-              //
-              // // sign in button
               MyButton(
                 onTap: signUserIn,
               ),
-              //
               const SizedBox(height: 50),
-
-              // or continue with
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 25.0),
                 child: Row(
@@ -187,24 +134,7 @@ class _LoginPageState extends State<LoginPage> {
                   ],
                 ),
               ),
-
-              // google + apple sign
-              // Row(
-              //   mainAxisAlignment: MainAxisAlignment.center,
-              //   children: const [
-              //     // google button
-              //     SquareTile(imagePath: 'lib/images/google.png'),
-              //
-              //     SizedBox(width: 25,),
-              //
-              //     //apple button
-              //     SquareTile(imagePath: 'lib/images/apple.png'),
-              //   ],
-              // ),
-
               const SizedBox(height: 50),
-
-              // not a member? register now
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -222,18 +152,9 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     onTap: register,
-                  )
-                  // const Text(
-                  //   'Register Now',
-                  //   style: TextStyle(
-                  //     color: Colors.blue,
-                  //     fontWeight: FontWeight.bold,
-                  //   ),
-                  // ),
+                  ),
                 ],
               ),
-
-
             ],
           ),
         ),
