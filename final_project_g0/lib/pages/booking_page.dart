@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase/services/firestore.dart';
+import '/services/firestore.dart';
 import 'package:intl/intl.dart';
 
 class BookingsPage extends StatelessWidget {
@@ -19,8 +19,8 @@ class BookingsPage extends StatelessWidget {
       appBar: AppBar(
         title: Text('All Bookings'),
       ),
-      body: FutureBuilder<QuerySnapshot>(
-        future: FirestoreService().getBookings(hotelID, roomID),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirestoreService().getBookingsStream(hotelID, roomID),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());

@@ -16,16 +16,8 @@ class FirestoreService {
     return hotels.doc(docID).delete();
   }
 
-  Future<QuerySnapshot> getHotelsPaginated(int limit, DocumentSnapshot? lastDocument) {
-    Query query = hotels.orderBy('timestamp', descending: true).limit(limit);
-    if (lastDocument != null) {
-      query = query.startAfterDocument(lastDocument);
-    }
-    return query.get();
-  }
-
-  Future<DocumentSnapshot> getHotel(String hotelID) {
-    return hotels.doc(hotelID).get();
+  Stream<QuerySnapshot> getHotelsStream() {
+    return hotels.orderBy('timestamp', descending: true).snapshots();
   }
 
   // Room operations
@@ -41,12 +33,8 @@ class FirestoreService {
     return hotels.doc(hotelID).collection('rooms').doc(roomID).delete();
   }
 
-  Future<QuerySnapshot> getRooms(String hotelID) {
-    return hotels.doc(hotelID).collection('rooms').orderBy('timestamp', descending: true).get();
-  }
-
-  Future<DocumentSnapshot> getRoom(String hotelID, String roomID) {
-    return hotels.doc(hotelID).collection('rooms').doc(roomID).get();
+  Stream<QuerySnapshot> getRoomsStream(String hotelID) {
+    return hotels.doc(hotelID).collection('rooms').orderBy('timestamp', descending: true).snapshots();
   }
 
   Future<void> bookRoom(String hotelID, String roomID, DateTime startDate, DateTime endDate) {
@@ -57,17 +45,7 @@ class FirestoreService {
     });
   }
 
-  Future<QuerySnapshot> getBookings(String hotelID, String roomID) {
-    return hotels.doc(hotelID).collection('rooms').doc(roomID).collection('bookings').orderBy('timestamp', descending: true).get();
-  }
-
-  // Fetch all hotels
-  Future<QuerySnapshot> getAllHotels() async {
-    return await hotels.get();
-  }
-
-  // Fetch all rooms for a given hotel
-  Future<QuerySnapshot> getAllRooms(String hotelID) async {
-    return await hotels.doc(hotelID).collection('rooms').get();
+  Stream<QuerySnapshot> getBookingsStream(String hotelID, String roomID) {
+    return hotels.doc(hotelID).collection('rooms').doc(roomID).collection('bookings').orderBy('timestamp', descending: true).snapshots();
   }
 }

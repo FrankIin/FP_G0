@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase/services/firestore.dart';
+import '/services/firestore.dart';
 import 'booking_page.dart';
 import 'hotel_detail.dart';
 
@@ -72,7 +71,7 @@ class _RoomDetailPageState extends State<RoomDetailPage> {
               SizedBox(height: 10),
               Text('Guests: ${widget.guests}'),
               Text('Beds: ${widget.beds}'),
-              Text('Price: \$${widget.price}'),
+              Text('Price: IDR ${widget.price.toInt()}'),
               SizedBox(height: 10),
               Text('Booking:', style: TextStyle(fontWeight: FontWeight.bold)),
               Row(

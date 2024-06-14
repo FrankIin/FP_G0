@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase/services/firestore.dart';
+import '/services/firestore.dart';
 import 'room_detail.dart';
 import 'add_room.dart';
 
@@ -20,41 +20,6 @@ class HotelDetailPage extends StatefulWidget {
 
 class _HotelDetailPageState extends State<HotelDetailPage> {
   final FirestoreService fireStoreService = FirestoreService();
-  DocumentSnapshot? hotelData;
-  List<DocumentSnapshot> roomsList = [];
-  bool isLoading = false;
-
-  @override
-  void initState() {
-    super.initState();
-    fetchHotelData();
-    getRooms();
-  }
-
-  Future<void> fetchHotelData() async {
-    setState(() {
-      isLoading = true;
-    });
-
-    DocumentSnapshot snapshot = await fireStoreService.getHotel(widget.hotelID);
-    setState(() {
-      hotelData = snapshot;
-      isLoading = false;
-    });
-  }
-
-  Future<void> getRooms() async {
-    setState(() {
-      isLoading = true;
-    });
-
-    QuerySnapshot querySnapshot = await fireStoreService.getRooms(widget.hotelID);
-
-    setState(() {
-      isLoading = false;
-      roomsList = querySnapshot.docs;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,105 +34,132 @@ class _HotelDetailPageState extends State<HotelDetailPage> {
         ),
         child: const Icon(Icons.add),
       ),
-      body: isLoading
-          ? Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
+      body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            hotelData != null ? buildHotelInfo() : Container(),
+            StreamBuilder<QuerySnapshot>(
+              stream: fireStoreService.getHotelsStream(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                }
+                if (!snapshot.hasData) {
+                  return Center(child: Text('Hotel not found.'));
+                }
+                Map<String, dynamic>? hotelData;
+                for (var doc in snapshot.data!.docs) {
+                  if (doc.id == widget.hotelID) {
+                    hotelData = doc.data() as Map<String, dynamic>?;
+                    break;
+                  }
+                }
+                if (hotelData == null) {
+                  return Center(child: Text('Hotel not found.'));
+                }
+                return buildHotelInfo(hotelData);
+              },
+            ),
             Divider(),
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Text('Rooms', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             ),
-            roomsList.isEmpty
-                ? Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text('No rooms available.'),
-            )
-                : GridView.builder(
-              shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 10.0,
-                mainAxisSpacing: 10.0,
-              ),
-              itemCount: roomsList.length,
-              itemBuilder: (context, index) {
-                DocumentSnapshot document = roomsList[index];
-                String roomID = document.id;
+            StreamBuilder<QuerySnapshot>(
+              stream: fireStoreService.getRoomsStream(widget.hotelID),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                }
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text('No rooms available.'),
+                  );
+                }
+                List<DocumentSnapshot> roomsList = snapshot.data!.docs;
+                return GridView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 10.0,
+                    mainAxisSpacing: 10.0,
+                  ),
+                  itemCount: roomsList.length,
+                  itemBuilder: (context, index) {
+                    DocumentSnapshot document = roomsList[index];
+                    String roomID = document.id;
+                    Map<String, dynamic> data = document.data() as Map<String, dynamic>;
 
-                Map<String, dynamic> data = document.data() as Map<String, dynamic>;
+                    String roomName = data['name'] ?? 'No name';
+                    String description = data['description'] ?? 'No description';
+                    String imageUrl = data['images'] != null && data['images'].isNotEmpty ? data['images'][0] : '';
+                    List<String> amenities = data['amenities'] != null ? List<String>.from(data['amenities']) : [];
+                    int guests = data['guests'] ?? 0;
+                    int beds = data['beds'] ?? 0;
+                    double price = (data['price'] ?? 0).toDouble();
 
-                // Ensure all required fields are present and not null
-                String roomName = data['name'] ?? 'No name';
-                String description = data['description'] ?? 'No description';
-                String imageUrl = data['images'] != null && data['images'].isNotEmpty ? data['images'][0] : '';
-                List<String> amenities = data['amenities'] != null ? List<String>.from(data['amenities']) : [];
-                int guests = data['guests'] ?? 0;
-                int beds = data['beds'] ?? 0;
-                double price = (data['price'] ?? 0).toDouble();
-
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => RoomDetailPage(
-                          hotelID: widget.hotelID,
-                          roomID: roomID,
-                          roomName: roomName,
-                          description: description,
-                          imageUrl: imageUrl,
-                          amenities: amenities,
-                          guests: guests,
-                          beds: beds,
-                          hotelName: widget.hotelName,
-                          price: price,
-                        ),
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => RoomDetailPage(
+                              hotelID: widget.hotelID,
+                              roomID: roomID,
+                              roomName: roomName,
+                              description: description,
+                              imageUrl: imageUrl,
+                              amenities: amenities,
+                              guests: guests,
+                              beds: beds,
+                              hotelName: widget.hotelName,
+                              price: price,
+                            ),
+                          ),
+                        );
+                      },
+                      child: Stack(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              image: DecorationImage(
+                                image: NetworkImage(imageUrl),
+                                fit: BoxFit.cover,
+                              ),
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                          ),
+                          Positioned(
+                            top: 10,
+                            right: 10,
+                            child: Row(
+                              children: [
+                                IconButton(
+                                  onPressed: () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => AddRoomPage(
+                                        hotelID: widget.hotelID,
+                                        roomID: roomID,
+                                        roomData: data,
+                                      ),
+                                    ),
+                                  ),
+                                  icon: const Icon(Icons.edit, color: Colors.white),
+                                ),
+                                IconButton(
+                                  onPressed: () => fireStoreService.deleteRoom(widget.hotelID, roomID),
+                                  icon: const Icon(Icons.delete, color: Colors.white),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     );
                   },
-                  child: Stack(
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image: NetworkImage(imageUrl),
-                            fit: BoxFit.cover,
-                          ),
-                          borderRadius: BorderRadius.circular(10.0),
-                        ),
-                      ),
-                      Positioned(
-                        top: 10,
-                        right: 10,
-                        child: Row(
-                          children: [
-                            IconButton(
-                              onPressed: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => AddRoomPage(
-                                    hotelID: widget.hotelID,
-                                    roomID: roomID,
-                                    roomData: data,
-                                  ),
-                                ),
-                              ),
-                              icon: const Icon(Icons.edit, color: Colors.white),
-                            ),
-                            IconButton(
-                              onPressed: () => fireStoreService.deleteRoom(widget.hotelID, roomID),
-                              icon: const Icon(Icons.delete, color: Colors.white),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
                 );
               },
             ),
@@ -177,8 +169,7 @@ class _HotelDetailPageState extends State<HotelDetailPage> {
     );
   }
 
-  Widget buildHotelInfo() {
-    Map<String, dynamic> data = hotelData!.data() as Map<String, dynamic>;
+  Widget buildHotelInfo(Map<String, dynamic> data) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(

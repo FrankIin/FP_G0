@@ -2,13 +2,11 @@
 
 // import 'dart:js';
 
-import 'package:firebase/components/my_button.dart';
-import 'package:firebase/components/my_textfield.dart';
-import 'package:firebase/pages/square_tile.dart';
+import '/components/my_button.dart';
+import '/components/my_textfield.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase/pages/login.dart';
 
 class RegisterPage extends StatefulWidget {
   RegisterPage({super.key});
