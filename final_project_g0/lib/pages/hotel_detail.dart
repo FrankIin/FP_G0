@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '/services/firestore.dart';
 import 'room_detail.dart';
 import 'add_room.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class HotelDetailPage extends StatefulWidget {
   final String hotelID;
@@ -20,6 +21,11 @@ class HotelDetailPage extends StatefulWidget {
 
 class _HotelDetailPageState extends State<HotelDetailPage> {
   final FirestoreService fireStoreService = FirestoreService();
+  final user = FirebaseAuth.instance.currentUser!;
+
+  bool get isAdmin {
+    return user.email == 'admin@gmail.com'; // Adjust this as needed
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,13 +33,15 @@ class _HotelDetailPageState extends State<HotelDetailPage> {
       appBar: AppBar(
         title: Text(widget.hotelName),
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: isAdmin
+          ? FloatingActionButton(
         onPressed: () => Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => AddRoomPage(hotelID: widget.hotelID)),
         ),
         child: const Icon(Icons.add),
-      ),
+      )
+          : null,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -91,14 +99,7 @@ class _HotelDetailPageState extends State<HotelDetailPage> {
                     DocumentSnapshot document = roomsList[index];
                     String roomID = document.id;
                     Map<String, dynamic> data = document.data() as Map<String, dynamic>;
-
-                    String roomName = data['name'] ?? 'No name';
-                    String description = data['description'] ?? 'No description';
                     String imageUrl = data['images'] != null && data['images'].isNotEmpty ? data['images'][0] : '';
-                    List<String> amenities = data['amenities'] != null ? List<String>.from(data['amenities']) : [];
-                    int guests = data['guests'] ?? 0;
-                    int beds = data['beds'] ?? 0;
-                    double price = (data['price'] ?? 0).toDouble();
 
                     return GestureDetector(
                       onTap: () {
@@ -107,15 +108,8 @@ class _HotelDetailPageState extends State<HotelDetailPage> {
                           MaterialPageRoute(
                             builder: (context) => RoomDetailPage(
                               hotelID: widget.hotelID,
-                              roomID: roomID,
-                              roomName: roomName,
-                              description: description,
-                              imageUrl: imageUrl,
-                              amenities: amenities,
-                              guests: guests,
-                              beds: beds,
                               hotelName: widget.hotelName,
-                              price: price,
+                              roomID: roomID,
                             ),
                           ),
                         );
@@ -134,7 +128,8 @@ class _HotelDetailPageState extends State<HotelDetailPage> {
                           Positioned(
                             top: 10,
                             right: 10,
-                            child: Row(
+                            child: isAdmin
+                                ? Row(
                               children: [
                                 IconButton(
                                   onPressed: () => Navigator.push(
@@ -154,7 +149,8 @@ class _HotelDetailPageState extends State<HotelDetailPage> {
                                   icon: const Icon(Icons.delete, color: Colors.white),
                                 ),
                               ],
-                            ),
+                            )
+                                : Container(),
                           ),
                         ],
                       ),

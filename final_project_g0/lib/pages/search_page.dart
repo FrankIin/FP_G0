@@ -129,14 +129,7 @@ class _SearchPageState extends State<SearchPage> {
                         builder: (context) => RoomDetailPage(
                           roomID: result['roomID'],
                           hotelID: result['hotelID'],
-                          roomName: result['roomName'],
-                          description: result['description'],
-                          imageUrl: result['imageUrl'],
-                          amenities: List<String>.from(result['amenities']),
-                          guests: result['guests'],
-                          beds: result['beds'],
                           hotelName: result['hotelName'],
-                          price: result['price'],
                         ),
                       ),
                     );

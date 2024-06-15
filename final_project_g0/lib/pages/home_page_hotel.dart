@@ -23,18 +23,22 @@ class _HomePageState extends State<HomePage> {
     FirebaseAuth.instance.signOut();
   }
 
+  bool get isAdmin {
+    return user.email == 'admin@gmail.com'; // Adjust this as needed
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Hotels"),
         actions: [
-          Text("Sign Out!"),
-          IconButton(
+          TextButton(
             onPressed: signUserOut,
-            icon: Icon(Icons.logout),
+            child: const Text("Sign Out",
+                // style: TextStyle(color: Colors.white)
+            ),
           ),
-          Text("Search"),
           IconButton(
             icon: Icon(Icons.search),
             onPressed: () {
@@ -46,13 +50,15 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: isAdmin
+          ? FloatingActionButton(
         onPressed: () => Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => AddHotelPage()),
         ),
         child: const Icon(Icons.add),
-      ),
+      )
+          : null,
       body: StreamBuilder<QuerySnapshot>(
         stream: fireStoreService.getHotelsStream(),
         builder: (context, snapshot) {
@@ -104,7 +110,8 @@ class _HomePageState extends State<HomePage> {
                     Positioned(
                       top: 10,
                       right: 10,
-                      child: Row(
+                      child: isAdmin
+                          ? Row(
                         children: [
                           IconButton(
                             onPressed: () => Navigator.push(
@@ -120,7 +127,8 @@ class _HomePageState extends State<HomePage> {
                             icon: const Icon(Icons.delete, color: Colors.white),
                           ),
                         ],
-                      ),
+                      )
+                          : Container(),
                     ),
                   ],
                 ),
@@ -129,13 +137,6 @@ class _HomePageState extends State<HomePage> {
           );
         },
       ),
-    );
-  }
-
-  void openRoomBox({required String hotelID}) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => HotelDetailPage(hotelID: hotelID, hotelName: '')),
     );
   }
 }

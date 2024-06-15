@@ -20,6 +20,10 @@ class FirestoreService {
     return hotels.orderBy('timestamp', descending: true).snapshots();
   }
 
+  Stream<DocumentSnapshot> getHotelStream(String hotelID) {
+    return hotels.doc(hotelID).snapshots();
+  }
+
   // Room operations
   Future<void> addRoom(String hotelID, Map<String, dynamic> roomData) {
     return hotels.doc(hotelID).collection('rooms').add(roomData);
@@ -37,11 +41,17 @@ class FirestoreService {
     return hotels.doc(hotelID).collection('rooms').orderBy('timestamp', descending: true).snapshots();
   }
 
-  Future<void> bookRoom(String hotelID, String roomID, DateTime startDate, DateTime endDate) {
+  Stream<DocumentSnapshot> getRoomStream(String hotelID, String roomID) {
+    return hotels.doc(hotelID).collection('rooms').doc(roomID).snapshots();
+  }
+
+  Future<void> bookRoom(String hotelID, String roomID, DateTime startDate, DateTime endDate, String userEmail, double amount) {
     return hotels.doc(hotelID).collection('rooms').doc(roomID).collection('bookings').add({
       'start_date': Timestamp.fromDate(startDate),
       'end_date': Timestamp.fromDate(endDate),
       'timestamp': Timestamp.now(),
+      'user_email': userEmail,
+      'amount': amount,
     });
   }
 

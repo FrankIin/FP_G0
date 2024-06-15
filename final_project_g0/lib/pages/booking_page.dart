@@ -35,9 +35,20 @@ class BookingsPage extends StatelessWidget {
               Map<String, dynamic> data = bookings[index].data() as Map<String, dynamic>;
               DateTime startDate = (data['start_date'] as Timestamp).toDate();
               DateTime endDate = (data['end_date'] as Timestamp).toDate();
+              String userEmail = data['user_email'] ?? 'No email provided';
+              double amount = data['amount'] ?? 0.0;
+
               return ListTile(
                 title: Text('Booking ${index + 1}'),
-                subtitle: Text('From ${DateFormat('yyyy-MM-dd').format(startDate)} to ${DateFormat('yyyy-MM-dd').format(endDate)}'),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('From: ${DateFormat('yyyy-MM-dd').format(startDate)}'),
+                    Text('To: ${DateFormat('yyyy-MM-dd').format(endDate)}'),
+                    Text('User Email: $userEmail'),
+                    Text('Amount: IDR ${NumberFormat('#,##0').format(amount)}'),
+                  ],
+                ),
               );
             },
           );
