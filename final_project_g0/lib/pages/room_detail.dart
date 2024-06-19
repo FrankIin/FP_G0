@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '/services/firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'booking_page.dart';
+import 'hotel_detail.dart';
 import 'package:intl/intl.dart';
 
 class RoomDetailPage extends StatefulWidget {
@@ -110,6 +111,22 @@ class _RoomDetailPageState extends State<RoomDetailPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.hotelName),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.hotel),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => HotelDetailPage(
+                    hotelID: widget.hotelID,
+                    hotelName: widget.hotelName,
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: StreamBuilder<DocumentSnapshot>(
         stream: fireStoreService.getRoomStream(widget.hotelID, widget.roomID),

@@ -5,6 +5,7 @@ import '/services/firestore.dart';
 import 'hotel_detail.dart'; // Import the hotel detail page
 import 'add_hotel.dart';
 import 'search_page.dart';  // Import the search page
+import 'all_bookings_page.dart'; // Import the all bookings page
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -35,9 +36,7 @@ class _HomePageState extends State<HomePage> {
         actions: [
           TextButton(
             onPressed: signUserOut,
-            child: const Text("Sign Out",
-                // style: TextStyle(color: Colors.white)
-            ),
+            child: const Text("Sign Out"),
           ),
           IconButton(
             icon: Icon(Icons.search),
@@ -48,6 +47,16 @@ class _HomePageState extends State<HomePage> {
               );
             },
           ),
+          if (isAdmin) // Show bookings icon only for admin
+            IconButton(
+              icon: Icon(Icons.book),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AllBookingsPage()), // All bookings page for admin
+                );
+              },
+            ),
         ],
       ),
       floatingActionButton: isAdmin
