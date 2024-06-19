@@ -55,7 +55,7 @@ class _RoomDetailPageState extends State<RoomDetailPage> {
     }
   }
 
-  void _bookRoom(double price) {
+  Future<void> _bookRoom(double price) async {
     if (_startDate == null || _endDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Please select both start and end dates')),
@@ -66,18 +66,39 @@ class _RoomDetailPageState extends State<RoomDetailPage> {
     final int nights = _endDate!.difference(_startDate!).inDays;
     final double amount = price * nights;
 
-    fireStoreService.bookRoom(
-      widget.hotelID,
-      widget.roomID,
-      _startDate!,
-      _endDate!,
-      user.email!,
-      amount,
-    );
+    if (await _isBookingAvailable(_startDate!, _endDate!)) {
+      fireStoreService.bookRoom(
+        widget.hotelID,
+        widget.roomID,
+        _startDate!,
+        _endDate!,
+        user.email!,
+        amount,
+      );
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Room booked successfully')),
-    );
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Room booked successfully')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('The room is already booked for the selected dates')),
+      );
+    }
+  }
+
+  Future<bool> _isBookingAvailable(DateTime startDate, DateTime endDate) async {
+    QuerySnapshot bookingsSnapshot = await fireStoreService.getBookingsStream(widget.hotelID, widget.roomID).first;
+    for (var doc in bookingsSnapshot.docs) {
+      Map<String, dynamic> booking = doc.data() as Map<String, dynamic>;
+      DateTime bookingStart = (booking['start_date'] as Timestamp).toDate();
+      DateTime bookingEnd = (booking['end_date'] as Timestamp).toDate();
+
+      if ((startDate.isBefore(bookingEnd) && endDate.isAfter(bookingStart)) ||
+          startDate.isAtSameMomentAs(bookingStart) || endDate.isAtSameMomentAs(bookingEnd)) {
+        return false;
+      }
+    }
+    return true;
   }
 
   bool get isAdmin {
