@@ -1,3 +1,5 @@
+import 'package:firebase/pages/rating_widget.dart';
+import 'package:five_pointed_star/five_pointed_star.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -7,14 +9,20 @@ import 'room_detail.dart';
 import 'add_room.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+
+// import 'package:flutter_rating_stars/flutter_rating_stars.dart';
+
+
 class HotelDetailPage extends StatefulWidget {
   final String hotelID;
   final String hotelName;
+  // final Rating? rating;
 
   const HotelDetailPage({
     Key? key,
     required this.hotelID,
     required this.hotelName,
+    // required this.rating,
   }) : super(key: key);
 
   @override
@@ -24,7 +32,14 @@ class HotelDetailPage extends StatefulWidget {
 class _HotelDetailPageState extends State<HotelDetailPage> {
   final FirestoreService fireStoreService = FirestoreService();
   final user = FirebaseAuth.instance.currentUser!;
+  int mycount = 0;
 
+
+  // late bool isImportant;
+  // late int number;
+  // late String title;
+  // late String description;
+  // late double starCount;
   bool get isAdmin {
     return user.email == 'admin@gmail.com'; // Adjust this as needed
   }
@@ -167,24 +182,47 @@ class _HotelDetailPageState extends State<HotelDetailPage> {
               child: Text('Reviews', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             ),
             StreamBuilder<QuerySnapshot>(
+
               stream: fireStoreService.getStarsStream(widget.hotelID),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Center(child: CircularProgressIndicator());
                 }
                 if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: buildStars(context),
+                  return Row(
+
                   );
                 }
-                buildStars(
-                  context,
+                else{
 
-                );
-                for(int i = 0 ; i < 5 ; i++) {
+                  return FivePointedStar(
+                    onChange: (count) {
+                      // setState(() {
+                      //   mycount = count;
+                      // });
+                      Map<String, dynamic> star = {
+                        "value" : 3,
+                        "user" : user.email,
+                        'timestamp': Timestamp.now(),
+                      };
+                      fireStoreService.addStar(widget.hotelID, star);
+                    },
+                  );
+                }
+                // return FivePointedStar(
+                //   onChange: (count) {
+                //     setState(() {
+                //       mycount = count;
+                //     });
+                //     Map<String, dynamic> star = {
+                //       "value" : mycount,
+                //       "user" : user.email,
+                //       'timestamp': Timestamp.now(),
+                //     };
+                //     fireStoreService.addStar(widget.hotelID, star);
+                //   },
+                // );
 
-                };
                 return build(context);
               },
             ),
@@ -198,6 +236,7 @@ class _HotelDetailPageState extends State<HotelDetailPage> {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: RatingStars(
+        // starCount: 5,
         editable: true,
         rating: 0,
         color: Colors.yellow,
@@ -205,6 +244,33 @@ class _HotelDetailPageState extends State<HotelDetailPage> {
       ),
     );
 
+  }
+
+  Widget buildStar(BuildContext context, int index) {
+    Icon icon;
+    double ratingvalue = 0;
+    if (index >= ratingvalue) {
+      icon = new Icon(
+        Icons.star_border,
+        color: Colors.black,
+      );
+    }
+    else if (index > ratingvalue - 1 && index < ratingvalue) {
+      icon = new Icon(
+        Icons.star_half,
+        color:  Colors.red,
+      );
+    } else {
+      icon = new Icon(
+        Icons.star,
+        color: Colors.red,
+      );
+    }
+    var onRatingChanged;
+    return new InkResponse(
+      onTap: onRatingChanged == null ? null : () => onRatingChanged(index + 1.0),
+      child: icon,
+    );
   }
 
   Widget buildHotelInfo(Map<String, dynamic> data) {

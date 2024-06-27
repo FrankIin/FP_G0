@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '/services/firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'booking_page.dart';
-import 'hotel_detail.dart';
 import 'package:intl/intl.dart';
 
 class RoomDetailPage extends StatefulWidget {
@@ -56,7 +55,7 @@ class _RoomDetailPageState extends State<RoomDetailPage> {
     }
   }
 
-  Future<void> _bookRoom(double price) async {
+  void _bookRoom(double price) {
     if (_startDate == null || _endDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Please select both start and end dates')),
@@ -67,39 +66,18 @@ class _RoomDetailPageState extends State<RoomDetailPage> {
     final int nights = _endDate!.difference(_startDate!).inDays;
     final double amount = price * nights;
 
-    if (await _isBookingAvailable(_startDate!, _endDate!)) {
-      fireStoreService.bookRoom(
-        widget.hotelID,
-        widget.roomID,
-        _startDate!,
-        _endDate!,
-        user.email!,
-        amount,
-      );
+    fireStoreService.bookRoom(
+      widget.hotelID,
+      widget.roomID,
+      _startDate!,
+      _endDate!,
+      user.email!,
+      amount,
+    );
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Room booked successfully')),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('The room is already booked for the selected dates')),
-      );
-    }
-  }
-
-  Future<bool> _isBookingAvailable(DateTime startDate, DateTime endDate) async {
-    QuerySnapshot bookingsSnapshot = await fireStoreService.getBookingsStream(widget.hotelID, widget.roomID).first;
-    for (var doc in bookingsSnapshot.docs) {
-      Map<String, dynamic> booking = doc.data() as Map<String, dynamic>;
-      DateTime bookingStart = (booking['start_date'] as Timestamp).toDate();
-      DateTime bookingEnd = (booking['end_date'] as Timestamp).toDate();
-
-      if ((startDate.isBefore(bookingEnd) && endDate.isAfter(bookingStart)) ||
-          startDate.isAtSameMomentAs(bookingStart) || endDate.isAtSameMomentAs(bookingEnd)) {
-        return false;
-      }
-    }
-    return true;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Room booked successfully')),
+    );
   }
 
   bool get isAdmin {
@@ -111,22 +89,6 @@ class _RoomDetailPageState extends State<RoomDetailPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.hotelName),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.hotel),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => HotelDetailPage(
-                    hotelID: widget.hotelID,
-                    hotelName: widget.hotelName,
-                  ),
-                ),
-              );
-            },
-          ),
-        ],
       ),
       body: StreamBuilder<DocumentSnapshot>(
         stream: fireStoreService.getRoomStream(widget.hotelID, widget.roomID),
