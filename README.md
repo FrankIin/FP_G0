@@ -16,3 +16,13 @@ Reference : https://drive.google.com/drive/folders/1Ph3C-9Iqnp3_r4ko_Ic5rhFBHlt3
 
 
 # screenshot our UI app
+
+### Admin Sides
+
+![alt text](final_project_g0/lib/pic/admin.png)
+
+
+### Customer Sides
+
+![alt text](final_project_g0/lib/pic/customer.png)
+
