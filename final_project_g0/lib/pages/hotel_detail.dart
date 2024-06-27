@@ -1,5 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:rate_in_stars/rate_in_stars.dart';
 import '/services/firestore.dart';
 import 'room_detail.dart';
 import 'add_room.dart';
@@ -159,10 +161,50 @@ class _HotelDetailPageState extends State<HotelDetailPage> {
                 );
               },
             ),
+            Divider(),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text('Reviews', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            ),
+            StreamBuilder<QuerySnapshot>(
+              stream: fireStoreService.getStarsStream(widget.hotelID),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                }
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: buildStars(context),
+                  );
+                }
+                buildStars(
+                  context,
+
+                );
+                for(int i = 0 ; i < 5 ; i++) {
+
+                };
+                return build(context);
+              },
+            ),
           ],
         ),
       ),
     );
+  }
+
+  Widget buildStars(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: RatingStars(
+        editable: true,
+        rating: 0,
+        color: Colors.yellow,
+        iconSize: 32,
+      ),
+    );
+
   }
 
   Widget buildHotelInfo(Map<String, dynamic> data) {
@@ -202,3 +244,5 @@ class _HotelDetailPageState extends State<HotelDetailPage> {
     );
   }
 }
+
+

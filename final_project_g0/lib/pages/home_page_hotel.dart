@@ -5,7 +5,6 @@ import '/services/firestore.dart';
 import 'hotel_detail.dart'; // Import the hotel detail page
 import 'add_hotel.dart';
 import 'search_page.dart';  // Import the search page
-import 'all_bookings_page.dart'; // Import the all bookings page
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -28,6 +27,7 @@ class _HomePageState extends State<HomePage> {
     return user.email == 'admin@gmail.com'; // Adjust this as needed
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,7 +36,9 @@ class _HomePageState extends State<HomePage> {
         actions: [
           TextButton(
             onPressed: signUserOut,
-            child: const Text("Sign Out"),
+            child: const Text("Sign Out",
+                // style: TextStyle(color: Colors.white)
+            ),
           ),
           IconButton(
             icon: Icon(Icons.search),
@@ -47,16 +49,6 @@ class _HomePageState extends State<HomePage> {
               );
             },
           ),
-          if (isAdmin) // Show bookings icon only for admin
-            IconButton(
-              icon: Icon(Icons.book),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => AllBookingsPage()), // All bookings page for admin
-                );
-              },
-            ),
         ],
       ),
       floatingActionButton: isAdmin
@@ -78,6 +70,8 @@ class _HomePageState extends State<HomePage> {
             return Center(child: Text('No hotels found.'));
           }
 
+
+
           List<DocumentSnapshot> hotelsList = snapshot.data!.docs;
 
           return GridView.builder(
@@ -90,6 +84,16 @@ class _HomePageState extends State<HomePage> {
             itemBuilder: (context, index) {
               DocumentSnapshot document = hotelsList[index];
               String docID = document.id;
+              //bookmark checking
+              bool checkBookmark = false;
+
+
+
+              Map<String, dynamic> bookmark = {
+                "hotelID" : docID,
+                "user" : user.email,
+                'timestamp': Timestamp.now(),
+              };
 
               Map<String, dynamic> data = document.data() as Map<String, dynamic>;
 
@@ -129,6 +133,7 @@ class _HomePageState extends State<HomePage> {
                                 builder: (context) => AddHotelPage(docID: docID, hotelData: data),
                               ),
                             ),
+
                             icon: const Icon(Icons.edit, color: Colors.white),
                           ),
                           IconButton(
@@ -137,7 +142,75 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ],
                       )
-                          : Container(),
+
+                          // : Container(),
+                     : Row(
+                        // children: [
+                        //   IconButton(
+                        //       onPressed: () => fireStoreService.addBookmark(bookmark),
+                        //       icon:  Icon(Icons.book_outlined, color: Colors.white)
+                        //   ),
+                        // ],
+
+
+                          children: [
+                            StreamBuilder<QuerySnapshot>(
+                              stream: fireStoreService.getBookmarksStream(),
+                              builder: (context, snapshot) {
+                                bool checkdata = false;
+                                if (snapshot.connectionState == ConnectionState.waiting) {
+                                  return Center(child: CircularProgressIndicator());
+                                }
+                                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                                  return IconButton(
+                                      onPressed: () => fireStoreService.addBookmark(bookmark),
+                                      icon:  Icon(Icons.book_outlined, color: Colors.white)
+                                  );
+                                }
+
+                                List<DocumentSnapshot> bookmarksList = snapshot.data!.docs;
+                                for(int i = 0; i < bookmarksList.length; i++) {
+                                  // Object? doc = bookmarksList[i].data();
+                                  Map<String, dynamic> doc = bookmarksList[i].data() as Map<String, dynamic>;
+                                  // for(int j = 0; j<doc)
+                                  // return Text(doc["hotelID"]+" - "+docID);
+                                  if(docID == doc["hotelID"] &&  user.email == doc["user"]){
+                                    // return Text(docID);
+
+                                    return IconButton(
+                                        // onPressed: () =>{},
+
+                                        onPressed: () => fireStoreService.deleteBookmark(bookmarksList[i].id),
+                                        icon:  Icon(Icons.bookmark, color: Colors.white)
+                                    );
+                                    checkdata = true;
+                                  }
+                                  else{
+                                    return IconButton(
+                                        onPressed: () => fireStoreService.addBookmark(bookmark),
+                                        icon:  Icon(Icons.book_outlined, color: Colors.white)
+                                    );
+                                  }
+                                }
+                                return build(context);
+
+                                // return Center(
+                                //   itemCount: hotelsList.length,
+                                //   itemBuilder: (context, index) {
+                                //     DocumentSnapshot document = hotelsList[index];
+                                //     String docID = document.id;
+                                //   },
+                                // );
+
+                              },
+                            ),
+                            // IconButton(
+                            //   onPressed: () => fireStoreService.addBookmark(bookmark),
+                            //   icon:  Icon(Icons.book_outlined, color: Colors.white)
+                            // ),
+                          ],
+
+                      ),
                     ),
                   ],
                 ),
